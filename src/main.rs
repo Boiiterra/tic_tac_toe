@@ -1,22 +1,20 @@
-#![allow(unused)]
-
 use std::io;
 use std::io::Write;
 
 fn main() {
     let mut players: [(char, bool); 2] = [('X', true), ('O', true)];
     let mut winner: Option<bool> = None;
-    let mut table = [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '];
-    let mut allowed_i: Vec<u8> = Vec::from([11, 12, 13, 21, 22, 23, 31, 32, 33]);
+    let mut table = ['0', '1', '2', '3', '4', '5', '6', '7', '8'];
+    let mut allowed_i: Vec<u8> = Vec::from([0, 1, 2, 3, 4, 5, 6, 7, 8]);
 
     let something: bool = game_type();
     players = who(something, players);
 
-    for i in (0..=1) {
+    for i in 0..=1 {
         println!("{} {}", players[i].0, players[i].1);
     }
 
-    for i in (0..10) {
+    for i in 0..9 {
 
         println!("{}", i);
         draw_table(&table);
@@ -29,7 +27,8 @@ fn main() {
             index = 1;
         }
 
-        table = change_table(players[index], table, &mut allowed_i);
+        change_table(players[index], &mut table, &mut allowed_i);
+        winner = get_winner(&table);
     }
 
     match winner {
@@ -114,9 +113,9 @@ fn who(is_pve: bool, mut players: [(char, bool); 2]) -> [(char, bool); 2] {
     players
 }
 
-fn change_table(player: (char, bool), mut table: [char; 9], allowed_i: &mut Vec<u8>) -> [char; 9] {
+fn change_table(player: (char, bool), table: &mut [char; 9], allowed_i: &mut Vec<u8>) {
     loop {
-        print!("Where do you want to place your {} (row column, ex.: 21 or 33): ", player.0);
+        print!("Where do you want to place your {} (position, ex.: 0 or 8): ", player.0);
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
@@ -125,7 +124,7 @@ fn change_table(player: (char, bool), mut table: [char; 9], allowed_i: &mut Vec<
             .read_line(&mut input)
             .expect("Failed to read line.");
 
-        let number:u8 = match input.trim().parse() {
+        let number: usize = match input.trim().parse() {
             Ok(num) => num,
             Err(_) => {
                 println!("Not a number. Please try again.");
@@ -133,26 +132,47 @@ fn change_table(player: (char, bool), mut table: [char; 9], allowed_i: &mut Vec<
             },
         };
 
-        if allowed_i.contains(&number) {
-            let index: usize = ((number / 10 - 1) * 3 + (number % 10 - 1)) as usize;
-            println!("Your move is row {} and column {}. index -> {} -> \"{}\"", number / 10, number % 10, index, table[index]);
-            let index = allowed_i.iter().position(|x| *x == number).unwrap();
+        if allowed_i.contains(&(number as u8)) {
+            println!("'{}'", table[number]);
+            println!("Your move is {}. \"{}\"", number, table[number]);
+            let index = allowed_i.iter().position(|x| *x == (number as u8)).unwrap();
             allowed_i.remove(index);
             table[index] = player.0;
+            break;
         } else {
-            println!("Unfortunately you can't place '{}' here.", player.0)
+            println!("Unfortunately you can't place '{}' here.", player.0);
         }
     }
-    table
+}
+
+fn get_winner(table: &[char; 9]) -> Option<bool> {
+    if table[0] == table[1] && table[1] == table[2] {
+        Some(table[0] == 'X')
+    } else if table[3] == table[4] && table[4] == table[5] {
+        Some(table[0] == 'X')
+    } else if table[6] == table[7] && table[7] == table[8] {
+        Some(table[0] == 'X')
+    } else if table[0] == table[3] && table[3] == table[6] {
+        Some(table[0] == 'X')
+    } else if table[1] == table[4] && table[4] == table[7] {
+        Some(table[0] == 'X')
+    } else if table[2] == table[5] && table[5] == table[8] {
+        Some(table[0] == 'X')
+    } else if table[0] == table[4] && table[4] == table[8] {
+        Some(table[0] == 'X')
+    } else if table[2] == table[4] && table[4] == table[6] {
+        Some(table[0] == 'X')
+    } else {
+        None
+    }
 }
 
 fn draw_table(table: &[char; 9]) {
-    println!("    1   2   3  ");
-    println!("  +---+---+---+");
-    println!("1 | {} | {} | {} |", &table[0], &table[1], &table[2]);
-    println!("  +---+---+---+");
-    println!("2 | {} | {} | {} |", &table[3], &table[4], &table[5]);
-    println!("  +---+---+---+");
-    println!("3 | {} | {} | {} |", &table[6], &table[7], &table[8]);
-    println!("  +---+---+---+");
+    println!("+---+---+---+");
+    println!("| {} | {} | {} |", &table[0], &table[1], &table[2]);
+    println!("+---+---+---+");
+    println!("| {} | {} | {} |", &table[3], &table[4], &table[5]);
+    println!("+---+---+---+");
+    println!("| {} | {} | {} |", &table[6], &table[7], &table[8]);
+    println!("+---+---+---+");
 }
