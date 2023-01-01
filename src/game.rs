@@ -1,3 +1,6 @@
+use rand::seq::SliceRandom;
+use std::io::Write;
+
 #[derive(PartialEq)]
 enum GameType {
     Choose,
@@ -5,78 +8,190 @@ enum GameType {
     PvE,
 }
 
-#[derive(PartialEq)] //* working on that soon
+#[derive(PartialEq)]
+enum Winner {
+    None,
+    O,
+    X,
+}
+
+impl Winner {
+    fn check(cell: char) -> Winner {
+        match cell {
+            'O' => Winner::O,
+            'X' => Winner::X,
+            ' ' => Winner::None,
+            _ => panic!("This char is not supported, please revert your changes!"),
+        }
+    }
+}
+
+#[derive(PartialEq, Debug, Clone, Copy)] //* working on that soon
 enum Difficulty {
     Easy,
     Medium,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy)]
 struct Player {
     mark: char,
 }
 
-#[derive(PartialEq)]
-struct Bot {
-    mark: char,
-    difficulty: Difficulty,
-    field: [u8; 9],
+impl Player {
+    fn new_x() -> Self {
+        Self {
+            mark: 'X',
+        }
+    }
+
+    fn new_o() -> Self {
+        Self {
+            mark: 'O',
+        }
+    }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy)]
+struct Bot {
+    mark: char,
+    field: [i8; 9],
+    difficulty: Difficulty,
+}
+
+impl Bot {
+    fn construct(mark: char, difficulty: Difficulty) -> Self {
+        Self {
+            mark,
+            field: [0; 9],
+            difficulty,
+        }
+    }
+
+    fn update_field(&mut self, at: usize, enemy: bool) {
+        if enemy {
+            self.field[at] = -1;
+        } else {
+            self.field[at] = -2;
+        }
+
+        if self.difficulty == Difficulty::Medium {
+            ();
+        }
+    }
+
+    fn make_move(&self) -> usize {
+        if self.difficulty == Difficulty::Medium {
+            1
+        } else {
+            let mut allowed: Vec<usize> = Vec::new();
+            for i in 0..self.field.len() {
+                if self.field[i] == 0 {
+                    allowed.push(i);
+                }
+            }
+            *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
+        }
+    }
+}
+
+#[derive(Debug)]
 enum Participants {
     Player(Player),
     Bot(Bot),
 }
 
-impl Participants {
-    fn get
-}
-
-impl Bot {
-    fn new(mark: char) -> Self {
-        Self {
-            mark,
-            difficulty: Difficulty::Easy,
-            field: [0; 9]
-        }
-    }
-
-    fn change_difficulty(&mut self, to: Difficulty) {
-        self.difficulty = to;
-    }
-}
-
 pub struct TicTacToe {
     game_table: [Option<char>; 9],
     game_type: GameType,
-    x_wins: u32,
-    o_wins: u32,
+    x_score: u32,
+    o_score: u32,
 }
 
 impl TicTacToe {
     fn new() -> Self {
-        Self { game_table: [None; 9], game_type: GameType::Choose, x_wins: 0, o_wins: 0 }
+        Self {
+            game_table: [None; 9],
+            game_type: GameType::Choose,
+            x_score: 0,
+            o_score: 0
+        }
     }
 
-    fn change_type(&mut self, to: GameType) {
-        self.game_type = to;
+    fn change_type(&mut self) {
+        loop {
+            print!("Which game type do you wand to choose: 1. PvP or 2. PvE: ");
+            std::io::stdout().flush().unwrap();
+
+            let raw_input = input();
+
+            let index: u8 = match raw_input.trim().parse() {
+                Ok(num) => {
+                    if num == 1 || num == 2 {
+                        num
+                    } else {
+                        println!("Please try to enter 1 or 2 not '{num}'.");
+                        continue;
+                    }},
+                Err(_) => {
+                    println!("Something wrong happened. Please try again.");
+                    continue;
+                }
+            };
+
+            if index == 1 {
+                self.game_type = GameType::PvP;
+                break;
+            } else if index == 2 {
+                self.game_type = GameType::PvE;
+                break;
+            }
+        }
     }
 
-    fn make_move(&mut self, index: usize, player_char: char) {
-        self.game_table[index] = Some(player_char);
+    fn update_table(&mut self, at: usize, player_char: char) {
+        self.game_table[at] = Some(player_char);
+    }
+
+    fn get_winner(&self) -> Winner {
+        if self.game_table[0] == self.game_table[1] && self.game_table[1] == self.game_table[2] {
+            Winner::check(self.game_table[0].unpack())
+        } else if self.game_table[3] == self.game_table[4] && self.game_table[4] == self.game_table[5] {
+            Winner::check(self.game_table[3].unpack())
+        } else if self.game_table[6] == self.game_table[7] && self.game_table[7] == self.game_table[8] {
+            Winner::check(self.game_table[6].unpack())
+        } else if self.game_table[0] == self.game_table[3] && self.game_table[3] == self.game_table[6] {
+            Winner::check(self.game_table[0].unpack())
+        } else if self.game_table[1] == self.game_table[4] && self.game_table[4] == self.game_table[7] {
+            Winner::check(self.game_table[1].unpack())
+        } else if self.game_table[2] == self.game_table[5] && self.game_table[5] == self.game_table[8] {
+            Winner::check(self.game_table[2].unpack())
+        } else if self.game_table[0] == self.game_table[4] && self.game_table[4] == self.game_table[8] {
+            Winner::check(self.game_table[0].unpack())
+        } else if self.game_table[2] == self.game_table[4] && self.game_table[4] == self.game_table[6] {
+            Winner::check(self.game_table[2].unpack())
+        } else {
+            Winner::None
+        }
+    }
+
+    fn score(&self) {
+        println!("+-Game score--+\n\
+                  |>   X : O   <|\n\
+                  |>   {} : {}   <|\n\
+                  +-------------+\n",
+                self.x_score, self.o_score);
     }
 
     fn x_won(&mut self) {
-        self.x_wins += 1;
+        self.x_score += 1;
     }
 
     fn o_won(&mut self) {
-        self.o_wins += 1;
+        self.o_score += 1;
     }
 }
 
-use std::{fmt::Display, io::Write};
+use std::fmt::Display;
 impl Display for TicTacToe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -88,17 +203,17 @@ impl Display for TicTacToe {
              +---+---+---+\n\
              | {} | {} | {} |\n\
              +---+---+---+\n",
-            self.game_table[0].unpack(), // row one start
-            self.game_table[1].unpack(),
-            self.game_table[2].unpack(), // row one end
+            if self.game_table[0].unpack() == ' ' {'1'} else {self.game_table[0].unpack()}, // row one start
+            if self.game_table[1].unpack() == ' ' {'2'} else {self.game_table[1].unpack()},
+            if self.game_table[2].unpack() == ' ' {'3'} else {self.game_table[2].unpack()}, // row one end
 
-            self.game_table[3].unpack(), // row two start
-            self.game_table[4].unpack(),
-            self.game_table[5].unpack(), // row two end
+            if self.game_table[3].unpack() == ' ' {'4'} else {self.game_table[3].unpack()}, // row two start
+            if self.game_table[4].unpack() == ' ' {'5'} else {self.game_table[4].unpack()},
+            if self.game_table[5].unpack() == ' ' {'6'} else {self.game_table[5].unpack()}, // row two end
 
-            self.game_table[6].unpack(), // row three start
-            self.game_table[7].unpack(),
-            self.game_table[8].unpack()  // row three end
+            if self.game_table[6].unpack() == ' ' {'7'} else {self.game_table[6].unpack()}, // row three start
+            if self.game_table[7].unpack() == ' ' {'8'} else {self.game_table[7].unpack()},
+            if self.game_table[8].unpack() == ' ' {'9'} else {self.game_table[8].unpack()}  // row three end
         )
     }
 }
@@ -121,41 +236,10 @@ fn input() -> String {
     output
 }
 
-fn choose_game_type(game: &mut TicTacToe) {
-    loop {
-        print!("Which game type do you wand to choose: 1. PvP or 2. PvE: ");
-        std::io::stdout().flush().unwrap();
-
-        let raw_input = input();
-
-        let index: u8 = match raw_input.trim().parse() {
-            Ok(num) => {
-                if num == 1 || num == 2 {
-                    num
-                } else {
-                    println!("Please try to enter 1 or 2 not '{num}'.");
-                    continue;
-                }},
-            Err(_) => {
-                println!("Something wrong happened. Please try again.");
-                continue;
-            }
-        };
-
-        if index == 1 {
-            game.change_type(GameType::PvP);
-            break;
-        } else if index == 2 {
-            game.change_type(GameType::PvE);
-            break;
-        }
-    }
-}
-
 fn setup_players(game: &TicTacToe) -> [Participants; 2] {
         if game.game_type == GameType::PvP {
-            print!("Decide who plays with 'X' and who plays with 'O'.");
-            [Participants::Player(Player {mark: 'X',}), Participants::Player(Player {mark: 'O',})]
+            println!("Decide who plays with 'X' and who plays with 'O'.");
+            [Participants::Player(Player::new_x()), Participants::Player(Player::new_o())]
         } else {
             loop {
                 print!("Who do you want to play as 1. 'X' or 2. 'O': ");
@@ -177,77 +261,95 @@ fn setup_players(game: &TicTacToe) -> [Participants; 2] {
                     }
                 };
 
+                let difficulty  = change_difficulty();
+
                 if number == 1 {
-                    return [Participants::Player(Player {mark: 'X'}), Participants::Bot(Bot::new('O'))];
+                    return [Participants::Player(Player::new_x()), Participants::Bot(Bot::construct('O', difficulty))];
                 } else {
-                    return [Participants::Bot(Bot::new('X')), Participants::Player(Player {mark: 'O'})];
+                    return [Participants::Bot(Bot::construct('X', difficulty)), Participants::Player(Player::new_o())];
                 }
             }
         }
 }
 
-fn change_table(game: &mut TicTacToe, player_char: char) {
+fn change_difficulty() -> Difficulty {
     loop {
-        print!("Where do you want to place '{}'", player_char);
+        print!("Which difficulty do you want to choose? 1. Easy or 2. Medium: ");
         std::io::stdout().flush().unwrap();
 
         let raw_input = input();
 
-        let index: usize = match raw_input.trim().parse() {
-            Ok(num) => num,
+        let choice: u8 = match raw_input.trim().parse() {
+            Ok(num) => {
+                if num == 1 || num == 2 { num }
+                else {
+                    println!("Try entering 1 or 2.");
+                    continue;
+                }
+            },
+            Err(_) => {
+                println!("This is not a number. Please try again.");
+                continue;
+            },
+        };
+
+        if choice == 1 {
+            return Difficulty::Easy;
+        } else {
+            return Difficulty::Medium;
+        }
+    }
+}
+
+fn change_table(game: &mut TicTacToe, player_char: char) -> usize {
+    loop {
+        print!("Where do you want to place '{}': ", player_char);
+        std::io::stdout().flush().unwrap();
+
+        let raw_input = input();
+
+        let mut index: usize = match raw_input.trim().parse() {
+            Ok(num) => {
+                if num > 0 && num < 10 {
+                    num
+                } else {
+                    println!("Please try integer between 0 and 10");
+                    continue;
+                }
+            },
             Err(_) => {
                 println!("Not a number. Please try again.");
                 continue;
             }
         };
 
+        index -= 1;
+
         if game
             .game_table
             .get(index)
-            .expect("Please don't write index out of table")
+            .expect("Please don't write index out of table") // This won't panic too - IF panic -> something went completely wrong
             .is_none()
         {
-            println!("'{}'", game.game_table[index].unpack());
-            println!(
-                "Your move is {}. \"{}\"",
-                index,
-                game.game_table[index].unpack()
-            );
-            game.make_move(index, player_char);
-            break;
+            return index;
         } else {
             println!(
-                "Unfortunately you can't place '{}' here.",
+                "Unfortunately you can't place '{}' here. Please try another position.",
                 player_char
             );
         }
     }
 }
 
-fn choose_difficulty(game: &mut TicTacToe) { // TODO: finish this one
-    print!("Which difficulty do you want to choose? 1. Easy or 2. Medium");
-    let raw_input = input();
-}
-
 pub fn play() {
     let mut game = TicTacToe::new();
-    // choose_game_type(&mut game);
-    game.change_type(GameType::PvP);
-    let participants = setup_players(&game);
+    game.change_type();
+
+    let participants: [Participants; 2] = setup_players(&game);
+    let mut winner: Winner;
     let mut index: usize;
 
-    if game.game_type == GameType::PvE {
-        choose_difficulty(&mut game)
-    }
-
-    println!("\nSome hint for positions:\n\
-              +---+---+---+\n\
-              | 0 | 1 | 2 |\n\
-              +---+---+---+\n\
-              | 3 | 4 | 5 |\n\
-              +---+---+---+\n\
-              | 6 | 7 | 8 |\n\
-              +---+---+---+\n");
+    println!("{:?}", participants);
 
     println!("{game}");
 
@@ -257,7 +359,50 @@ pub fn play() {
         } else {
             index = 1;
         }
-        change_table(&mut game, participants[index].)
-    }
 
+        match participants[index] {
+            Participants::Bot(mut bot) => {
+                let at = bot.make_move();
+                bot.update_field(at, false);
+                game.update_table(at, bot.mark)
+            },
+            Participants::Player(player) => {
+                let at = change_table(&mut game, player.mark);
+                if game.game_type == GameType::PvE {
+                    if index == 1 {
+                        match participants[0] {
+                            Participants::Bot(mut bot) => {
+                                bot.update_field(at, true)
+                            },
+                            _ => (),
+                        };
+                    } else {
+                        match participants[1] {
+                            Participants::Bot(mut bot) => {
+                                bot.update_field(at, true)
+                            },
+                            _ => (),
+                        };
+                    }
+                }
+                game.update_table(at, player.mark)
+            },
+        }
+        println!("{game}");
+
+        winner = game.get_winner();
+
+        match winner {
+            Winner::X => {
+                game.x_won();
+                break;
+            },
+            Winner::O => {
+                game.o_won();
+                break;
+            },
+            Winner::None => (),
+        }
+    }
+    game.score();
 }
