@@ -28,6 +28,7 @@ impl Winner {
 
 #[derive(PartialEq, Debug, Clone, Copy)] //* working on that soon
 enum Difficulty {
+    ChaoticRandom,
     Easy,
     Medium,
 }
@@ -73,6 +74,7 @@ impl Bot {
         } else {
             self.field[at] = -2;
         }
+        println!("{:?}", self.field);
 
         if self.difficulty == Difficulty::Medium {
             ();
@@ -82,9 +84,21 @@ impl Bot {
     fn make_move(&self) -> usize {
         if self.difficulty == Difficulty::Medium {
             1
+        } else if self.difficulty == Difficulty::Easy {
+            let mut allowed: Vec<usize> = Vec::new();
+            let mut pos: usize = 0;
+            for i in self.field.iter() {
+                if *i == 0 {
+                    allowed.push(pos);
+                    pos += 1;
+                    println!("Available at {}", pos);
+                }
+            }
+            println!("{:?}", self.field);
+            *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
         } else {
             let mut allowed: Vec<usize> = Vec::new();
-            for i in 0..self.field.len() {
+            for i in 0..9 {
                 if self.field[i] == 0 {
                     allowed.push(i);
                 }
@@ -274,16 +288,16 @@ fn setup_players(game: &TicTacToe) -> [Participants; 2] {
 
 fn change_difficulty() -> Difficulty {
     loop {
-        print!("Which difficulty do you want to choose? 1. Easy or 2. Medium: ");
+        print!("Which difficulty do you want to choose? 1. Chaotic Random, 2. Easy or 3. Medium: ");
         std::io::stdout().flush().unwrap();
 
         let raw_input = input();
 
         let choice: u8 = match raw_input.trim().parse() {
             Ok(num) => {
-                if num == 1 || num == 2 { num }
+                if num == 1 || num == 2 || num == 3 { num }
                 else {
-                    println!("Try entering 1 or 2.");
+                    println!("Try entering 1, 2 or 3.");
                     continue;
                 }
             },
@@ -293,10 +307,11 @@ fn change_difficulty() -> Difficulty {
             },
         };
 
-        if choice == 1 {
-            return Difficulty::Easy;
-        } else {
-            return Difficulty::Medium;
+        match choice {
+            1 => return Difficulty::ChaoticRandom,
+            2 => return Difficulty::Easy,
+            3 => return Difficulty::Medium,
+            _ => panic!("This was unexpected!"),
         }
     }
 }
@@ -348,13 +363,15 @@ pub fn play() {
     let participants: [Participants; 2] = setup_players(&game);
     let mut winner: Winner;
     let mut index: usize;
+    let mut move_ = -1;
 
     println!("{:?}", participants);
 
     println!("{game}");
 
-    for i in 0..9 {
-        if i % 2 == 0 {
+    while game.game_table.iter().any(|&i| i == None) {
+        move_ += 1;
+        if move_ % 2 == 0 {
             index = 0;
         } else {
             index = 1;
@@ -404,5 +421,6 @@ pub fn play() {
             Winner::None => (),
         }
     }
+    println!("{game}");
     game.score();
 }
