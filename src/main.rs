@@ -1,5 +1,5 @@
-mod game;
+use tic_tac_toe::play;
 
 fn main() {
-    game::play();
+    play();
 }
