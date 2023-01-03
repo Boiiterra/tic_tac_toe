@@ -74,7 +74,6 @@ impl Bot {
         } else {
             self.field[at] = -2;
         }
-        println!("{:?}", self.field);
 
         if self.difficulty == Difficulty::Medium {
             ();
@@ -90,20 +89,12 @@ impl Bot {
             for i in self.field.iter() {
                 if *i == 0 {
                     allowed.push(pos);
-                    pos += 1;
-                    println!("Available at {}", pos);
                 }
+                pos += 1;
             }
-            println!("{:?}", self.field);
             *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
         } else {
-            let mut allowed: Vec<usize> = Vec::new();
-            for i in 0..9 {
-                if self.field[i] == 0 {
-                    allowed.push(i);
-                }
-            }
-            *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
+            *[0usize, 1, 2, 3, 4, 5, 6, 7, 8].choose(&mut rand::thread_rng()).unwrap() // Should not panic
         }
     }
 }
@@ -114,7 +105,7 @@ enum Participants {
     Bot(Bot),
 }
 
-pub struct TicTacToe {
+struct TicTacToe {
     game_table: [Option<char>; 9],
     game_type: GameType,
     x_score: u32,
@@ -311,7 +302,7 @@ fn change_difficulty() -> Difficulty {
             1 => return Difficulty::ChaoticRandom,
             2 => return Difficulty::Easy,
             3 => return Difficulty::Medium,
-            _ => panic!("This was unexpected!"),
+            _ => panic!("This was unexpected! BUG!!!"),
         }
     }
 }
@@ -360,12 +351,10 @@ pub fn play() {
     let mut game = TicTacToe::new();
     game.change_type();
 
-    let participants: [Participants; 2] = setup_players(&game);
+    let mut participants: [Participants; 2] = setup_players(&game);
     let mut winner: Winner;
     let mut index: usize;
     let mut move_ = -1;
-
-    println!("{:?}", participants);
 
     println!("{game}");
 
@@ -381,6 +370,9 @@ pub fn play() {
             Participants::Bot(mut bot) => {
                 let at = bot.make_move();
                 bot.update_field(at, false);
+                if bot.difficulty != Difficulty::ChaoticRandom {
+                    participants[index] = Participants::Bot(bot);
+                }
                 game.update_table(at, bot.mark)
             },
             Participants::Player(player) => {
@@ -389,14 +381,20 @@ pub fn play() {
                     if index == 1 {
                         match participants[0] {
                             Participants::Bot(mut bot) => {
-                                bot.update_field(at, true)
+                                bot.update_field(at, true);
+                                if bot.difficulty != Difficulty::ChaoticRandom {
+                                    participants[0] = Participants::Bot(bot);
+                                }
                             },
                             _ => (),
                         };
                     } else {
                         match participants[1] {
                             Participants::Bot(mut bot) => {
-                                bot.update_field(at, true)
+                                bot.update_field(at, true);
+                                if bot.difficulty != Difficulty::ChaoticRandom {
+                                    participants[0] = Participants::Bot(bot);
+                                }
                             },
                             _ => (),
                         };
