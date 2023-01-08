@@ -189,7 +189,7 @@ impl TicTacToe {
             return Winner::check(self.game_table[2].unpack());
         }
 
-        // no one is a winner :()
+        // no one is a winner :(
         Winner::None
     }
 
