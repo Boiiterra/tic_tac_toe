@@ -162,30 +162,30 @@ impl TicTacToe {
     }
 
     fn get_winner(&self) -> Winner {
-        if self.game_table_int[0].abs() + self.game_table_int[1].abs() + self.game_table_int[2].abs() == 3 {
+        if (self.game_table_int[0] + self.game_table_int[1] + self.game_table_int[2]).abs() == 3 {
             return Winner::check(self.game_table[0].unpack());
         }
-        if self.game_table_int[3].abs() + self.game_table_int[4].abs() + self.game_table_int[5].abs() == 3 {
+        if (self.game_table_int[3] + self.game_table_int[4] + self.game_table_int[5]).abs() == 3 {
             return Winner::check(self.game_table[3].unpack());
         }
-        if self.game_table_int[6].abs() + self.game_table_int[7].abs() + self.game_table_int[8].abs() == 3 {
+        if (self.game_table_int[6] + self.game_table_int[7] + self.game_table_int[8]).abs() == 3 {
             return Winner::check(self.game_table[6].unpack());
         }
 
-        if self.game_table_int[0].abs() + self.game_table_int[3].abs() + self.game_table_int[6].abs() == 3 {
+        if (self.game_table_int[0] + self.game_table_int[3] + self.game_table_int[6]).abs() == 3 {
             return Winner::check(self.game_table[0].unpack());
         }
-        if self.game_table_int[1].abs() + self.game_table_int[4].abs() + self.game_table_int[7].abs() == 3 {
+        if (self.game_table_int[1] + self.game_table_int[4] + self.game_table_int[7]).abs() == 3 {
             return Winner::check(self.game_table[1].unpack());
         }
-        if self.game_table_int[2].abs() + self.game_table_int[5].abs() + self.game_table_int[8].abs() == 3 {
+        if (self.game_table_int[2] + self.game_table_int[5] + self.game_table_int[8]).abs() == 3 {
             return Winner::check(self.game_table[2].unpack());
         }
 
-        if self.game_table_int[0].abs() + self.game_table_int[4].abs() + self.game_table_int[8].abs() == 3 {
+        if (self.game_table_int[0] + self.game_table_int[4] + self.game_table_int[8]).abs() == 3 {
             return Winner::check(self.game_table[0].unpack());
         }
-        if self.game_table_int[2].abs() + self.game_table_int[4].abs() + self.game_table_int[6].abs() == 3 {
+        if (self.game_table_int[2] + self.game_table_int[4] + self.game_table_int[6]).abs() == 3 {
             return Winner::check(self.game_table[2].unpack());
         }
 
