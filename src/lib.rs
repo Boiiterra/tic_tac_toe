@@ -159,24 +159,30 @@ impl TicTacToe {
 
     fn get_winner(&self) -> Winner {
         if self.game_table[0] == self.game_table[1] && self.game_table[1] == self.game_table[2] {
-            Winner::check(self.game_table[0].unpack())
-        } else if self.game_table[3] == self.game_table[4] && self.game_table[4] == self.game_table[5] {
-            Winner::check(self.game_table[3].unpack())
-        } else if self.game_table[6] == self.game_table[7] && self.game_table[7] == self.game_table[8] {
-            Winner::check(self.game_table[6].unpack())
-        } else if self.game_table[0] == self.game_table[3] && self.game_table[3] == self.game_table[6] {
-            Winner::check(self.game_table[0].unpack())
-        } else if self.game_table[1] == self.game_table[4] && self.game_table[4] == self.game_table[7] {
-            Winner::check(self.game_table[1].unpack())
-        } else if self.game_table[2] == self.game_table[5] && self.game_table[5] == self.game_table[8] {
-            Winner::check(self.game_table[2].unpack())
-        } else if self.game_table[0] == self.game_table[4] && self.game_table[4] == self.game_table[8] {
-            Winner::check(self.game_table[0].unpack())
-        } else if self.game_table[2] == self.game_table[4] && self.game_table[4] == self.game_table[6] {
-            Winner::check(self.game_table[2].unpack())
-        } else {
-            Winner::None
+            if Winner::check(self.game_table[0].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
         }
+        if self.game_table[3] == self.game_table[4] && self.game_table[4] == self.game_table[5] {
+            if Winner::check(self.game_table[3].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[6] == self.game_table[7] && self.game_table[7] == self.game_table[8] {
+            if Winner::check(self.game_table[6].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[0] == self.game_table[3] && self.game_table[3] == self.game_table[6] {
+            if Winner::check(self.game_table[0].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[1] == self.game_table[4] && self.game_table[4] == self.game_table[7] {
+            if Winner::check(self.game_table[1].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[2] == self.game_table[5] && self.game_table[5] == self.game_table[8] {
+            if Winner::check(self.game_table[2].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[0] == self.game_table[4] && self.game_table[4] == self.game_table[8] {
+            if Winner::check(self.game_table[0].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        if self.game_table[2] == self.game_table[4] && self.game_table[4] == self.game_table[6] {
+            if Winner::check(self.game_table[2].unpack()) != Winner::None { return Winner::check(self.game_table[0].unpack()); }
+        }
+        Winner::None
     }
 
     fn score(&self) {
@@ -378,27 +384,15 @@ pub fn play() {
             Participants::Player(player) => {
                 let at = change_table(&mut game, player.mark);
                 if game.game_type == GameType::PvE {
-                    if index == 1 {
-                        match participants[0] {
-                            Participants::Bot(mut bot) => {
-                                bot.update_field(at, true);
-                                if bot.difficulty != Difficulty::ChaoticRandom {
-                                    participants[0] = Participants::Bot(bot);
-                                }
-                            },
-                            _ => (),
-                        };
-                    } else {
-                        match participants[1] {
-                            Participants::Bot(mut bot) => {
-                                bot.update_field(at, true);
-                                if bot.difficulty != Difficulty::ChaoticRandom {
-                                    participants[0] = Participants::Bot(bot);
-                                }
-                            },
-                            _ => (),
-                        };
-                    }
+                    match participants[(index + 1) % 2] {
+                        Participants::Bot(mut bot) => {
+                            bot.update_field(at, true);
+                            if bot.difficulty != Difficulty::ChaoticRandom {
+                                participants[(index + 1) % 2] = Participants::Bot(bot);
+                            }
+                        },
+                        _ => (),
+                    };
                 }
                 game.update_table(at, player.mark)
             },
