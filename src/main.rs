@@ -121,6 +121,7 @@ impl TicTacToe {
 
     fn new_table(&mut self) {
         self.game_table = [None; 9];
+        self.game_table_int = [0i8; 9];
     }
 
     fn change_type(&mut self) {
