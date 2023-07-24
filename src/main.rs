@@ -21,16 +21,19 @@ impl Winner {
             'O' => Winner::O,
             'X' => Winner::X,
             ' ' => Winner::None,
-            _ => panic!("This char is not supported, please revert your changes, or make it supported!"),
+            _ => panic!(
+                "This char is not supported, please revert your changes, or make it supported!"
+            ),
         }
     }
 }
 
 #[derive(PartialEq, Debug, Clone, Copy)] //* working on that soon
 enum Difficulty {
-    ChaoticRandom,
-    Easy,
-    Medium,
+    ChaoticRandom, // Pure random with overwriting!
+    Easy,          // Random
+    Defender,      // My own thingy
+    _Medium,       // Minimax alg
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -40,15 +43,11 @@ struct Player {
 
 impl Player {
     fn new_x() -> Self {
-        Self {
-            mark: 'X',
-        }
+        Self { mark: 'X' }
     }
 
     fn new_o() -> Self {
-        Self {
-            mark: 'O',
-        }
+        Self { mark: 'O' }
     }
 }
 
@@ -70,14 +69,299 @@ impl Bot {
 
     fn update_field(&mut self, at: usize, enemy: bool) {
         self.field[at] = -1 - (enemy as i8);
-        // if self.difficulty == Difficulty::Medium {
-        //     ();
-        // }
+
+        if self.difficulty == Difficulty::Defender {
+            if enemy {
+                match at {
+                    0 => {
+                        if self.field[2] == -2 && self.field[1] >= 0 {
+                            self.field[1] += 2;
+                        } else if self.field[1] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        } else if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+
+                        if self.field[6] == -2 && self.field[3] >= 0 {
+                            self.field[3] += 2;
+                        } else if self.field[3] == -2 && self.field[6] >= 0 {
+                            self.field[6] += 2;
+                        } else if self.field[3] >= 0 {
+                            self.field[3] += 1;
+                        }
+
+                        if self.field[8] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                    }
+                    1 => {
+                        if self.field[2] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        } else if self.field[0] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        }
+                        if self.field[0] >= 0 {
+                            self.field[0] += 1;
+                        }
+                        if self.field[2] >= 0 {
+                            self.field[2] += 1;
+                        }
+
+                        if self.field[7] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[7] >= 0 {
+                            self.field[7] += 2;
+                        } else if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+
+                        if self.field[3] >= 0 {
+                            self.field[3] += 1;
+                        }
+                        if self.field[5] >= 0 {
+                            self.field[5] += 1;
+                        }
+                    }
+                    2 => {
+                        if self.field[0] == -2 && self.field[1] >= 0 {
+                            self.field[1] += 2;
+                        } else if self.field[1] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        } else if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+
+                        if self.field[8] == -2 && self.field[5] >= 0 {
+                            self.field[5] += 2;
+                        } else if self.field[5] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[5] >= 0 {
+                            self.field[5] += 1;
+                        }
+
+                        if self.field[6] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[6] >= 0 {
+                            self.field[6] += 2;
+                        } else if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                    }
+                    3 => {
+                        if self.field[5] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[5] >= 0 {
+                            self.field[5] += 2;
+                        }
+                        if self.field[6] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        } else if self.field[0] == -2 && self.field[6] >= 0 {
+                            self.field[0] += 2;
+                        }
+
+                        if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                        if self.field[6] >= 0 {
+                            self.field[6] += 1;
+                        }
+                        if self.field[0] >= 0 {
+                            self.field[0] += 1;
+                        }
+                        if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+                        if self.field[7] >= 0 {
+                            self.field[7] += 1;
+                        }
+                    }
+                    4 => {
+                        if self.field[1] == -2 && self.field[7] >= 0 {
+                            self.field[7] += 2;
+                        } else if self.field[7] == -2 && self.field[1] >= 0 {
+                            self.field[1] += 2;
+                        }
+                        if self.field[3] == -2 && self.field[5] >= 0 {
+                            self.field[5] += 2;
+                        } else if self.field[5] == -2 && self.field[3] >= 0 {
+                            self.field[3] += 2;
+                        }
+                        if self.field[0] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[8] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        }
+                        if self.field[2] == -2 && self.field[6] >= 0 {
+                            self.field[6] += 2;
+                        } else if self.field[6] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        }
+
+                        if self.field[0] >= 0 {
+                            self.field[0] += 1;
+                        }
+                        if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+                        if self.field[2] >= 0 {
+                            self.field[2] += 1;
+                        }
+                        if self.field[3] >= 0 {
+                            self.field[3] += 1;
+                        }
+                        if self.field[5] >= 0 {
+                            self.field[5] += 1;
+                        }
+                        if self.field[6] >= 0 {
+                            self.field[6] += 1;
+                        }
+                        if self.field[7] >= 0 {
+                            self.field[7] += 1;
+                        }
+                        if self.field[8] >= 0 {
+                            self.field[8] += 1;
+                        }
+                    }
+                    5 => {
+                        if self.field[2] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[8] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        }
+                        if self.field[3] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[3] >= 0 {
+                            self.field[3] += 2;
+                        }
+
+                        if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+                        if self.field[1] >= 0 {
+                            self.field[1] += 1;
+                        }
+                        if self.field[2] >= 0 {
+                            self.field[2] += 1;
+                        }
+                        if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                        if self.field[7] >= 0 {
+                            self.field[7] += 1;
+                        }
+                        if self.field[8] >= 0 {
+                            self.field[8] += 1;
+                        }
+                    }
+                    6 => {
+                        if self.field[0] == -2 && self.field[3] >= 0 {
+                            self.field[3] += 2;
+                        } else if self.field[3] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        }
+                        if self.field[7] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[8] == -2 && self.field[7] >= 0 {
+                            self.field[7] += 2;
+                        }
+                        if self.field[2] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        }
+
+                        if self.field[3] >= 0 {
+                            self.field[3] += 1;
+                        }
+                        if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                        if self.field[7] >= 0 {
+                            self.field[7] += 1;
+                        }
+                    }
+                    7 => {
+                        if self.field[1] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[1] >= 0 {
+                            self.field[1] += 2;
+                        }
+                        if self.field[6] == -2 && self.field[8] >= 0 {
+                            self.field[8] += 2;
+                        } else if self.field[8] == -2 && self.field[6] >= 0 {
+                            self.field[6] += 2;
+                        }
+
+                        if self.field[3] >= 0 {
+                            self.field[3] += 1;
+                        }
+                        if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                        if self.field[5] >= 0 {
+                            self.field[5] += 1;
+                        }
+                        if self.field[6] >= 0 {
+                            self.field[6] += 1;
+                        }
+                        if self.field[8] >= 0 {
+                            self.field[8] += 1;
+                        }
+                    }
+                    8 => {
+                        if self.field[0] == -2 && self.field[4] >= 0 {
+                            self.field[4] += 2;
+                        } else if self.field[4] == -2 && self.field[0] >= 0 {
+                            self.field[0] += 2;
+                        }
+                        if self.field[2] == -2 && self.field[5] >= 0 {
+                            self.field[5] += 2;
+                        } else if self.field[5] == -2 && self.field[2] >= 0 {
+                            self.field[2] += 2;
+                        }
+                        if self.field[6] == -2 && self.field[7] >= 0 {
+                            self.field[7] += 2;
+                        } else if self.field[7] == -2 && self.field[6] >= 0 {
+                            self.field[6] += 2;
+                        }
+
+                        if self.field[4] >= 0 {
+                            self.field[4] += 1;
+                        }
+                        if self.field[5] >= 0 {
+                            self.field[5] += 1;
+                        }
+                        if self.field[7] >= 0 {
+                            self.field[7] += 1;
+                        }
+                    }
+                    _ => (),
+                }
+            }
+        }
     }
 
     fn make_move(&self) -> usize {
-        if self.difficulty == Difficulty::Medium {
-            todo!("Implement algorithm for medium difficulty")
+        if self.difficulty == Difficulty::Defender {
+            let mut allowed: Vec<usize> = Vec::new();
+            let mut prev: i8 = -1;
+            let mut pos: usize = 0;
+            for i in self.field.iter() {
+                if *i > prev {
+                    // Found more valueble place.
+                    prev = *i;
+                    allowed = Vec::new();
+                }
+                if *i == prev {
+                    allowed.push(pos);
+                }
+                pos += 1;
+            }
+            *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
         } else if self.difficulty == Difficulty::Easy {
             let mut allowed: Vec<usize> = Vec::new();
             let mut pos: usize = 0;
@@ -89,7 +373,9 @@ impl Bot {
             }
             *allowed.choose(&mut rand::thread_rng()).unwrap() // Should not panic
         } else {
-            *[0usize, 1, 2, 3, 4, 5, 6, 7, 8].choose(&mut rand::thread_rng()).unwrap() // Should not panic
+            *[0usize, 1, 2, 3, 4, 5, 6, 7, 8]
+                .choose(&mut rand::thread_rng())
+                .unwrap() // Should not panic
         }
     }
 }
@@ -115,7 +401,7 @@ impl TicTacToe {
             game_type: GameType::Choose,
             game_table_int: [0; 9],
             x_score: 0,
-            o_score: 0
+            o_score: 0,
         }
     }
 
@@ -138,7 +424,8 @@ impl TicTacToe {
                     } else {
                         println!("Please try to enter 1 or 2 not '{num}'.");
                         continue;
-                    }},
+                    }
+                }
                 Err(_) => {
                     println!("Something wrong happened. Please try again.");
                     continue;
@@ -158,8 +445,11 @@ impl TicTacToe {
     fn update_table(&mut self, at: usize, player_char: char) {
         self.game_table[at] = Some(player_char);
 
-        if player_char == 'X' { self.game_table_int[at] = 1 }
-        else { self.game_table_int[at] = -1 }
+        if player_char == 'X' {
+            self.game_table_int[at] = 1
+        } else {
+            self.game_table_int[at] = -1
+        }
     }
 
     fn get_winner(&self) -> Winner {
@@ -195,11 +485,13 @@ impl TicTacToe {
     }
 
     fn score(&self) {
-        println!("+-Game score--+\n\
-                  |>   X : O   <|\n\
-                  |>   {} : {}   <|\n\
-                  +-------------+\n",
-                self.x_score, self.o_score);
+        println!(
+            "+-Game score--+\n\
+             |>   X : O   <|\n\
+             |>   {} : {}   <|\n\
+             +-------------+\n",
+            self.x_score, self.o_score
+        );
     }
 
     fn x_won(&mut self) {
@@ -223,17 +515,51 @@ impl Display for TicTacToe {
              +---+---+---+\n\
              | {} | {} | {} |\n\
              +---+---+---+\n",
-            if self.game_table[0].unpack() == ' ' {'1'} else {self.game_table[0].unpack()}, // row one start
-            if self.game_table[1].unpack() == ' ' {'2'} else {self.game_table[1].unpack()},
-            if self.game_table[2].unpack() == ' ' {'3'} else {self.game_table[2].unpack()}, // row one end
-
-            if self.game_table[3].unpack() == ' ' {'4'} else {self.game_table[3].unpack()}, // row two start
-            if self.game_table[4].unpack() == ' ' {'5'} else {self.game_table[4].unpack()},
-            if self.game_table[5].unpack() == ' ' {'6'} else {self.game_table[5].unpack()}, // row two end
-
-            if self.game_table[6].unpack() == ' ' {'7'} else {self.game_table[6].unpack()}, // row three start
-            if self.game_table[7].unpack() == ' ' {'8'} else {self.game_table[7].unpack()},
-            if self.game_table[8].unpack() == ' ' {'9'} else {self.game_table[8].unpack()}  // row three end
+            if self.game_table[0].unpack() == ' ' {
+                '1'
+            } else {
+                self.game_table[0].unpack()
+            }, // row one start
+            if self.game_table[1].unpack() == ' ' {
+                '2'
+            } else {
+                self.game_table[1].unpack()
+            },
+            if self.game_table[2].unpack() == ' ' {
+                '3'
+            } else {
+                self.game_table[2].unpack()
+            }, // row one end
+            if self.game_table[3].unpack() == ' ' {
+                '4'
+            } else {
+                self.game_table[3].unpack()
+            }, // row two start
+            if self.game_table[4].unpack() == ' ' {
+                '5'
+            } else {
+                self.game_table[4].unpack()
+            },
+            if self.game_table[5].unpack() == ' ' {
+                '6'
+            } else {
+                self.game_table[5].unpack()
+            }, // row two end
+            if self.game_table[6].unpack() == ' ' {
+                '7'
+            } else {
+                self.game_table[6].unpack()
+            }, // row three start
+            if self.game_table[7].unpack() == ' ' {
+                '8'
+            } else {
+                self.game_table[7].unpack()
+            },
+            if self.game_table[8].unpack() == ' ' {
+                '9'
+            } else {
+                self.game_table[8].unpack()
+            } // row three end
         )
     }
 }
@@ -257,39 +583,49 @@ fn input() -> String {
 }
 
 fn setup_players(game: &TicTacToe) -> [Participants; 2] {
-        if game.game_type == GameType::PvP {
-            println!("Decide who plays with 'X' and who plays with 'O'.");
-            [Participants::Player(Player::new_x()), Participants::Player(Player::new_o())]
-        } else {
-            loop {
-                print!("Who do you want to play as 1. 'X' or 2. 'O': ");
-                std::io::stdout().flush().unwrap();
+    if game.game_type == GameType::PvP {
+        println!("Decide who plays with 'X' and who plays with 'O'.");
+        [
+            Participants::Player(Player::new_x()),
+            Participants::Player(Player::new_o()),
+        ]
+    } else {
+        loop {
+            print!("Who do you want to play as 1. 'X' or 2. 'O': ");
+            std::io::stdout().flush().unwrap();
 
-                let raw_input = input();
+            let raw_input = input();
 
-                let number: u8 = match raw_input.trim().parse() {
-                    Ok(num) => {
-                        if num == 1 || num == 2 { num }
-                        else {
-                            println!("Please choose 1 or 2 next time not '{}'", num);
-                            continue;
-                        }
-                    },
-                    Err(_) => {
-                        println!("Unfortunately this is not a valid number.");
+            let number: u8 = match raw_input.trim().parse() {
+                Ok(num) => {
+                    if num == 1 || num == 2 {
+                        num
+                    } else {
+                        println!("Please choose 1 or 2 next time not '{}'", num);
                         continue;
                     }
-                };
-
-                let difficulty  = change_difficulty();
-
-                if number == 1 {
-                    return [Participants::Player(Player::new_x()), Participants::Bot(Bot::construct('O', difficulty))];
-                } else {
-                    return [Participants::Bot(Bot::construct('X', difficulty)), Participants::Player(Player::new_o())];
                 }
+                Err(_) => {
+                    println!("Unfortunately this is not a valid number.");
+                    continue;
+                }
+            };
+
+            let difficulty = change_difficulty();
+
+            if number == 1 {
+                return [
+                    Participants::Player(Player::new_x()),
+                    Participants::Bot(Bot::construct('O', difficulty)),
+                ];
+            } else {
+                return [
+                    Participants::Bot(Bot::construct('X', difficulty)),
+                    Participants::Player(Player::new_o()),
+                ];
             }
         }
+    }
 }
 
 fn change_difficulty() -> Difficulty {
@@ -301,22 +637,23 @@ fn change_difficulty() -> Difficulty {
 
         let choice: u8 = match raw_input.trim().parse() {
             Ok(num) => {
-                if num == 1 || num == 2 || num == 3 { num }
-                else {
+                if num == 1 || num == 2 || num == 3 {
+                    num
+                } else {
                     println!("Try entering 1, 2 or 3.");
                     continue;
                 }
-            },
+            }
             Err(_) => {
                 println!("This is not a number. Please try again.");
                 continue;
-            },
+            }
         };
 
         match choice {
             1 => return Difficulty::ChaoticRandom,
             2 => return Difficulty::Easy,
-            3 => return Difficulty::Medium,
+            3 => return Difficulty::Defender,
             _ => panic!("This was unexpected! BUG!!!"),
         }
     }
@@ -334,10 +671,10 @@ fn change_table(game: &mut TicTacToe, player_char: char) -> usize {
                 if num > 0 && num < 10 {
                     num
                 } else {
-                    println!("Please try integer between 0 and 10");
+                    println!("Please try integer between 0 and 10.");
                     continue;
                 }
-            },
+            }
             Err(_) => {
                 println!("Not a number. Please try again.");
                 continue;
@@ -349,7 +686,7 @@ fn change_table(game: &mut TicTacToe, player_char: char) -> usize {
         if game
             .game_table
             .get(index)
-            .expect("Please don't write index out of table") // This won't panic too - IF panic -> something went completely wrong
+            .expect("Please don't write index out of table.") // This won't panic too - IF panic -> something went completely wrong.
             .is_none()
         {
             return index;
@@ -364,7 +701,7 @@ fn change_table(game: &mut TicTacToe, player_char: char) -> usize {
 
 fn replay() -> bool {
     loop {
-        print!("Do you want to continue? y/n: ");
+        print!("Do you want to continue? Y/n: ");
         std::io::stdout().flush().unwrap();
 
         let mut r_in = input();
@@ -375,7 +712,7 @@ fn replay() -> bool {
             return false;
         }
 
-        if r_in == "y" || r_in == "Y" || r_in == "Yes" || r_in == "yes" {
+        if r_in == "y" || r_in == "Y" || r_in == "Yes" || r_in == "yes" || r_in == "" {
             return true;
         }
 
@@ -386,7 +723,7 @@ fn replay() -> bool {
 fn main() {
     let mut game = TicTacToe::new();
     loop {
-        game.change_type(); // PvP or PvE
+        game.change_type(); // PvP or PvE.
 
         let mut participants: [Participants; 2] = setup_players(&game);
         let mut winner: Winner;
@@ -395,7 +732,8 @@ fn main() {
 
         println!("{game}");
 
-        while game.game_table.iter().any(|&i| i == None) { // while there are free cells game is in progress
+        while game.game_table.iter().any(|&i| i == None) {
+            // While there are free cells game is in progress.
             move_ += 1;
             if move_ % 2 == 0 {
                 index = 0;
@@ -411,7 +749,7 @@ fn main() {
                         participants[index] = Participants::Bot(bot);
                     }
                     game.update_table(at, bot.mark)
-                },
+                }
                 Participants::Player(player) => {
                     let at = change_table(&mut game, player.mark);
                     if game.game_type == GameType::PvE {
@@ -421,12 +759,12 @@ fn main() {
                                 if bot.difficulty != Difficulty::ChaoticRandom {
                                     participants[(index + 1) % 2] = Participants::Bot(bot);
                                 }
-                            },
+                            }
                             _ => (),
                         };
                     }
                     game.update_table(at, player.mark)
-                },
+                }
             }
             println!("{game}");
 
@@ -436,19 +774,23 @@ fn main() {
                 Winner::X => {
                     game.x_won();
                     break;
-                },
+                }
                 Winner::O => {
                     game.o_won();
                     break;
-                },
-                Winner::None => (), // No one is a winner
+                }
+                Winner::None => (), // No one is a winner.
             }
         }
-        println!("{game}"); // draw final table
-        game.score(); // draw game scores
+        println!("{game}"); // Draw final table.
+        game.score(); // Draw game scores.
 
-        // replay the game
-        if replay() { game.new_table(); } // reset the game table
-        else { break; } // end the program
+        // Replay the game?
+        if replay() {
+            // Reset the game table.
+            game.new_table();
+        } else {
+            break;
+        } // End the program.
     }
 }
